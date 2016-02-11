@@ -47,6 +47,7 @@ DOMNodeCollection.prototype.append = function (arg) {
 
 DOMNodeCollection.prototype.addClass = function (string) {
   if (typeof string === "string") {
+    string = string.replace(/\s/g, "-");
     for (var i = 0; i < this.htmlArray.length; i++) {
       if (this.htmlArray[i].className.indexOf(" "+ string + " ") === -1) {
         this.htmlArray[i].className += " " + string + " ";
@@ -72,6 +73,16 @@ DOMNodeCollection.prototype.attr = function (key, value) {
       this.htmlArray[i].setAttribute(key, value);
     }
   }
+};
+
+DOMNodeCollection.prototype.removeClass = function (string) {
+  if (typeof string === "string") {
+    string = string.replace(/\s/g, "-");
+    for (var i = 0; i < this.htmlArray.length; i++) {
+      this.htmlArray[i].className.replace( " " + string +  " ", "");
+    }
+  }
+  return this;
 };
 
 
