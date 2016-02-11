@@ -1,6 +1,24 @@
 (function() {
 
 window.$l = function (arg) {
+
+  this.queue = this.queue || [];
+
+  document.addEventListener( 'DOMContentLoaded', function () {
+    while (this.queue[0]) {
+      this.queue.shift()();
+    }
+  }, false );
+
+  if (typeof arg === "function") {
+    if (document.readyState === 'complete') {
+      arg();
+    } else {
+      this.queue.push(arg);
+    }
+  }
+
+
   if (typeof arg === "string") {
     var nodeList = document.querySelectorAll(arg);
     return new DOMNodeCollection([].slice.call(nodeList));
@@ -84,6 +102,104 @@ DOMNodeCollection.prototype.removeClass = function (string) {
   }
   return this;
 };
+
+
+DOMNodeCollection.prototype.children = function () {
+  var childrenArray = [];
+  for (var i = 0; i < this.htmlArray.length; i++) {
+    var children = this.htmlArray[i].children;
+    for (var j = 0; j < children.length; j++) {
+      childrenArray.push(children[j]);
+    }
+  }
+  return new DOMNodeCollection(childrenArray);
+};
+
+
+DOMNodeCollection.prototype.parent = function() {
+  var parentArray = [];
+  for (var i = 0; i < this.htmlArray.length; i++) {
+    if (this.htmlArray[i].parentNode) {
+      parentArray(this.htmlArray[i].parentNode);
+    }
+  }
+  return new DOMNodeCollection(parentArray);
+};
+
+DOMNodeCollection.prototype.find = function (selector) {
+  var matchArray = [];
+  var matches = document.querySelectorAll(selector);
+
+  matches.forEach(function (match) {
+    matchArray.push(match);
+  });
+
+  return new DOMNodeCollection(matchArray);
+};
+
+DOMNodeCollection.prototype.remove = function () {
+  this.empty();
+  this.htmlArray = [];
+};
+
+DOMNodeCollection.prototype.on = function (inputEvent, callback) {
+  for (var i = 0; i < this.htmlArray.length; i++) {
+    this.htmlArray[i].addEventListener(inputEvent, callback);
+  }
+  return this;
+};
+
+DOMNodeCollection.prototype.off = function (inputEvent, callback) {
+  for (var i = 0; i < this.htmlArray.length; i++) {
+    this.htmlArray[i].removeEventListener(inputEvent, callback);
+  }
+  return this;
+};
+
+
+
+
+
+window.$l.extend = function() {
+  var args = [].slice.call(arguments);
+  var merged = {};
+
+  args.forEach(function (arg) {
+    for (var key in arg) {
+      merged[key] = arg[key];
+    }
+  });
+
+  return merged;
+};
+
+
+window.$l.ajax = function(options) {
+
+};
+
+
+// $.ajax({
+//       type: 'GET',
+//       url: "http://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=bcb83c4b54aee8418983c2aff3073b3b",
+//       success: function(data) {
+//         console.log("We have your weather!")
+//         console.log(data);
+//       },
+//       error: function() {
+//         console.error("An error occured.");
+//       },
+//    });
+
+// question: are we doing queue right?
+
+
+
+
+
+
+
+
 
 
 })();
