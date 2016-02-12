@@ -1,25 +1,23 @@
 (function() {
 
+var queue = [];
+
+document.addEventListener( 'DOMContentLoaded', function () {
+  while (queue[0]) {
+    queue.shift()();
+  }
+});
+
+
 window.$l = function (arg) {
-
-  this.queue = this.queue || [];
-
-  document.addEventListener( 'DOMContentLoaded', function () {
-    while (this.queue[0]) {
-      this.queue.shift()();
-    }
-  }, false );
 
   if (typeof arg === "function") {
     if (document.readyState === 'complete') {
       arg();
     } else {
-      this.queue.push(arg);
+      queue.push(arg);
     }
-  }
-
-
-  if (typeof arg === "string") {
+  } else if (typeof arg === "string") {
     var nodeList = document.querySelectorAll(arg);
     return new DOMNodeCollection([].slice.call(nodeList));
   } else if (arg instanceof HTMLElement) {
@@ -174,14 +172,60 @@ window.$l.extend = function() {
 };
 
 
-window.$l.ajax = function(options) {
 
+
+
+
+
+
+
+
+
+
+
+window.$l.ajax = function(options) {
+  var defaults = {
+    success: function () { console.log("success"); },
+    error: function () { console.log("error"); },
+    url: window.location.href,
+    method: 'GET',
+    data: {},
+    contentType:'application/x-www-form-urlencoded; charset=UTF-8'
+  };
+  options = window.$l.extend(defaults, options);
+
+  var ajaxReq = new XMLHttpRequest();
+  ajaxReq.setRequestHeader("Content-type", options['contentType']);
+  ajaxReq.onreadystatechange = function() {
+    if(ajaxReq.readyState === 4 && ajaxReq.status === 200) {
+        options['success']();
+    } else {
+      options['error']();
+    }
+  };
+  // do this: change query string if GET request
+  //
+  // var params = "";
+  // if (options['method'] === 'GET') {
+  //   params;// = some kind of query added to url?
+  // } else if (options['method'] === 'GET')
+  //
+  ajaxReq.open(options['method'], options['url']);
+  // do this: encode data with JSON.stringify
+  ajaxReq.send(JSON.stringify(options['data']));
 };
+// ajaxReq.addEventListener("load", function () {
+//   if (ajaxReq.status === 200) {
+//     options['success']();
+//   } else {
+//     options['error']();
+//   }
+// });
 
 
 // $.ajax({
 //       type: 'GET',
-//       url: "http://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=bcb83c4b54aee8418983c2aff3073b3b",
+//       url: "http://api.openweathermap.org/data/2.5/weather?",
 //       success: function(data) {
 //         console.log("We have your weather!")
 //         console.log(data);
